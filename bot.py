@@ -83,14 +83,14 @@ async def on_message(message):
 
         reply = chat_completion.choices[0].message.content.strip()
 
-        if not reply:
-            await message.channel.send("❓ Sorry, dazu hab ich gerade keine klare Antwort. Versuch's bitte nochmal oder stell deine Frage etwas anders.")
+        if not reply or reply.strip() == "":
+            await message.channel.send("❓ Dazu habe ich leider keine klare Antwort. Formuliere deine Frage gerne etwas anders oder genauer.")
         else:
             await message.channel.send(f"📈 {reply}")
 
     except Exception as e:
         print("❌ Fehler bei OpenAI:", e)
-        await message.channel.send("❓ Sorry, da lief wohl was schief bei mir. Versuch's bitte später nochmal.")
+        await message.channel.send("❓ Dazu habe ich leider keine klare Antwort. Formuliere deine Frage gerne etwas anders oder genauer.")
 
 # Bot starten
 client.run(DISCORD_TOKEN)
