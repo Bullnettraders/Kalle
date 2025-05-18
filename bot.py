@@ -1,8 +1,5 @@
 import discord
 import os
-import openai
-
-# Neue OpenAI Client API (ab Version 1.x)
 from openai import OpenAI
 
 # Discord Intents aktivieren
@@ -30,10 +27,10 @@ if not channel_id_raw:
 
 CHANNEL_ID = int(channel_id_raw)
 
-# OpenAI-Client initialisieren (ab v1.0)
+# OpenAI Client (ab Version 1.x)
 client_openai = OpenAI(api_key=OPENAI_API_KEY)
 
-# Begrüßung bei Start
+# Begrüßung beim Start
 @client.event
 async def on_ready():
     print(f"✅ Bot ist online als {client.user}")
@@ -41,7 +38,7 @@ async def on_ready():
     if channel:
         await channel.send("👋 Hey! Ich bin **Kalle**, dein KI-Bot rund ums **Trading**. Stell mir gerne deine Frage!")
 
-# Nachrichten behandeln
+# Nachricht empfangen und analysieren
 @client.event
 async def on_message(message):
     if message.channel.id != CHANNEL_ID or message.author.bot:
@@ -49,11 +46,11 @@ async def on_message(message):
 
     user_input = message.content.strip()
 
-    # Ignoriere Bot-Kommandos wie ! oder /
+    # Kommandos wie / oder ! ignorieren
     if user_input.startswith("!") or user_input.startswith("/"):
         return
 
-    # Trading-Keyword-Check
+    # Trading-Schlüsselwörter
     TRADING_KEYWORDS = [
         "trading", "aktien", "krypto", "chart", "forex", "börsen", "analyse",
         "bollinger", "bb", "moo", "macd", "moving average", "gleitender durchschnitt",
@@ -62,12 +59,12 @@ async def on_message(message):
     ]
 
     if not any(keyword in user_input.lower() for keyword in TRADING_KEYWORDS):
-        return  # Keine Antwort, wenn kein Trading-Bezug
+        return  # Keine Reaktion bei themenfremder Nachricht
 
     print(f"💬 Frage erkannt: {user_input}")
 
     try:
-        # Neue GPT-Anfrage mit OpenAI 1.x
+        # GPT-Anfrage
         chat_completion = client_openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -85,11 +82,15 @@ async def on_message(message):
         )
 
         reply = chat_completion.choices[0].message.content.strip()
-        await message.channel.send(f"📈 {reply}")
+
+        if not reply:
+            await message.channel.send("❓ Sorry, dazu hab ich gerade keine klare Antwort. Versuch's bitte nochmal oder stell deine Frage etwas anders.")
+        else:
+            await message.channel.send(f"📈 {reply}")
 
     except Exception as e:
         print("❌ Fehler bei OpenAI:", e)
-        await message.channel.send("⚠️ Es gab ein Problem mit meiner Antwort. Versuch es später nochmal.")
-        
+        await message.channel.send("❓ Sorry, da lief wohl was schief bei mir. Versuch's bitte später nochmal.")
+
 # Bot starten
 client.run(DISCORD_TOKEN)
